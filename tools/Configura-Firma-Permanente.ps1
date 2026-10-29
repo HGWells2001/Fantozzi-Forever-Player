@@ -86,7 +86,7 @@ if (-not $keytool) { throw 'Manca Java JDK con keytool. Installa JDK 17.' }
 
 Write-Host '=== Firma Android permanente: Fantozzi Forever ===' -ForegroundColor Cyan
 Write-Host "Repository: $Repository"
-& $gh auth status --hostname github.com 2>$null | Out-Null
+try { & $gh auth status --hostname github.com *> $null } catch { $global:LASTEXITCODE = 1 }
 if ($LASTEXITCODE -ne 0) {
     Write-Host 'Autenticazione GitHub dal browser...' -ForegroundColor Yellow
     & $gh auth login --hostname github.com --web
@@ -131,7 +131,7 @@ if ($esisteChiave) {
         & $keytool -genkeypair -noprompt -keystore $keystore -storetype JKS -alias $Alias -keyalg RSA -keysize 3072 -validity 10000 -dname 'CN=Fantozzi Forever Player, OU=Android, O=Progetto indipendente, C=IT' '-storepass:env' FF_FIRMA_PASSWORD_TEMP '-keypass:env' FF_FIRMA_PASSWORD_TEMP
         if ($LASTEXITCODE -ne 0) { throw 'keytool non ha creato la firma.' }
         $secure = ConvertTo-SecureString -String $password -AsPlainText -Force
-        $credential = New-Object System.Management.Automation.PSCredential($Alias, $secure)
+        $credential = [System.Management.Automation.PSCredential]::new($Alias, $secure)
         $credential | Export-Clixml -LiteralPath $credenziali
         Write-Host 'Nuova firma RSA 3072 creata fuori dal repository.' -ForegroundColor Green
     } catch {
