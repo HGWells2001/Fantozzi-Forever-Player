@@ -25,13 +25,17 @@ Non servono i privilegi di amministratore. La prima volta GitHub CLI può richie
 
 Lo script genera una chiave RSA a 3072 bit, un keystore e una password casuale forte, poi invia automaticamente quattro Secrets a GitHub: FF_KEYSTORE_BASE64, FF_STORE_PASSWORD, FF_KEY_ALIAS, FF_KEY_PASSWORD. Le password passano via STDIN, non negli argomenti di un processo.
 
-**Sicurezza:** il keystore non viene creato nel repository ma in %LOCALAPPDATA%\FantozziForever\Firma. La password viene salvata in credenziali-dpapi.xml, protetta dall'account Windows corrente. Per vedere la password e conservarla nel tuo gestore di password:
+**Sicurezza:** il keystore non viene creato nel repository ma in %LOCALAPPDATA%\FantozziForever\Firma. Lo script mantiene i permessi standard ereditati dal profilo Windows (senza Set-Acl e senza privilegi amministrativi). Non usare cartelle condivise per le chiavi. La password viene salvata in credenziali-dpapi.xml, protetta dall'account Windows corrente. Per vedere la password e conservarla nel tuo gestore di password:
 
 ~~~powershell
 powershell -NoProfile -ExecutionPolicy Bypass -File ".\Configura-Firma-Permanente.ps1" -MostraPassword
 ~~~
 
 Fai un backup sicuro sia del keystore sia della password. Il file DPAPI non è normalmente utilizzabile da un altro account Windows.
+
+## Se avevi ricevuto l'errore SeSecurityPrivilege
+
+Scarica nuovamente lo script con il comando riportato sopra e rieseguilo. **Non eliminare** il file fantozzi-permanente.jks o credenziali-dpapi.xml. La nuova versione riutilizza la stessa chiave; non deve generarne un'altra. L'avviso di keytool sul formato JKS non richiede alcuna conversione.
 
 ## Riutilizzo, protezioni e compilazione
 

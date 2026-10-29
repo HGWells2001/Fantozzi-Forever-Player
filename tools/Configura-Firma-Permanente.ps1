@@ -35,21 +35,6 @@ function Nuova-Password {
     finally { $rng.Dispose() }
     return ([BitConverter]::ToString($bytes)).Replace('-', '')
 }
-function Proteggi-Cartella([string]$Path) {
-    $identita = [System.Security.Principal.WindowsIdentity]::GetCurrent()
-    $acl = Get-Acl -LiteralPath $Path
-    $acl.SetAccessRuleProtection($true, $false)
-    $regola = [System.Security.AccessControl.FileSystemAccessRule]::new(
-        $identita.User,
-        [System.Security.AccessControl.FileSystemRights]::FullControl,
-        ([System.Security.AccessControl.InheritanceFlags]::ContainerInherit -bor
-         [System.Security.AccessControl.InheritanceFlags]::ObjectInherit),
-        [System.Security.AccessControl.PropagationFlags]::None,
-        [System.Security.AccessControl.AccessControlType]::Allow
-    )
-    $acl.SetAccessRule($regola)
-    Set-Acl -LiteralPath $Path -AclObject $acl
-}
 function Invia-Segreto([string]$Nome, [string]$Valore, [string]$Exe, [string]$Repo) {
     # Lo STDIN evita di passare segreti negli argomenti visibili del processo.
     $info = New-Object System.Diagnostics.ProcessStartInfo
@@ -104,7 +89,11 @@ $presenti = @($nomi | Where-Object { $esistenti -contains $_ })
 if (-not (Test-Path -LiteralPath $CartellaFirma)) {
     New-Item -ItemType Directory -Path $CartellaFirma -Force | Out-Null
 }
-Proteggi-Cartella $CartellaFirma
+# La cartella e nel profilo utente e conserva le ACL standard ereditate da
+# %LOCALAPPDATA%. Non usare Set-Acl: puo richiedere SeSecurityPrivilege
+# e interrompere la configurazione anche quando keystore e password sono validi.
+# Non spostare il keystore in cartelle condivise o sincronizzate.
+Write-Host 'Uso i permessi Windows esistenti per la cartella privata di firma.'
 $keystore = Join-Path $CartellaFirma 'fantozzi-permanente.jks'
 $credenziali = Join-Path $CartellaFirma 'credenziali-dpapi.xml'
 $esisteChiave = Test-Path -LiteralPath $keystore
