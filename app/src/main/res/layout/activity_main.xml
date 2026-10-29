@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent" android:layout_height="match_parent" android:orientation="vertical" android:background="#F4F1E9">
-    <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="FANTOZZI FOREVER" android:textSize="23sp" android:textStyle="bold" android:padding="18dp" android:textColor="#FFFFFF" android:background="#472B31"/>
+    <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/app_name" android:textSize="23sp" android:textStyle="bold" android:padding="18dp" android:textColor="#FFFFFF" android:background="#472B31"/>
     <TextView android:id="@+id/info" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/about" android:textColor="#4A3A37" android:textSize="12sp" android:padding="9dp"/>
     <ProgressBar android:id="@+id/loading" style="?android:attr/progressBarStyleHorizontal" android:layout_width="match_parent" android:layout_height="3dp" android:max="100"/>
+    <TextView android:id="@+id/status" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/loading" android:textSize="12sp" android:padding="8dp" android:visibility="gone" android:textColor="#672D2D"/>
     <WebView android:id="@+id/browser" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1"/>
     <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:background="#472B31" android:gravity="center">
         <Button android:id="@+id/home" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:text="@string/home" android:textSize="11sp"/>
