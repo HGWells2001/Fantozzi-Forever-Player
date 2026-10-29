@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+<color name="bg">#E9D9C6</color><color name="panel">#F7EDDF</color><color name="header">#4B7058</color><color name="headerText">#FFF6E8</color><color name="textPrimary">#352F28</color><color name="textSecondary">#65594D</color><color name="divider">#C9AE91</color><color name="favorite">#B87A39</color>
+</resources>

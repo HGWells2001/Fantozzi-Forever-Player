@@ -3,125 +3,122 @@ package it.fantozziforever.player;
 import android.app.Activity;
 import android.os.Bundle;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
-import android.webkit.WebView;
-import android.webkit.WebViewClient;
-import android.webkit.WebChromeClient;
-import android.webkit.WebResourceRequest;
-import android.webkit.WebResourceError;
-import android.webkit.WebSettings;
 import android.view.View;
-import android.widget.ProgressBar;
-import android.widget.TextView;
+import android.view.ViewGroup;
+import android.view.LayoutInflater;
+import android.widget.ArrayAdapter;
+import android.widget.BaseAdapter;
 import android.widget.Button;
-import android.webkit.RenderProcessGoneDetail;
+import android.widget.EditText;
+import android.widget.ListView;
+import android.widget.PopupMenu;
+import android.widget.TextView;
+import android.text.TextWatcher;
+import android.text.Editable;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
 
 public final class MainActivity extends Activity {
-    private static final String HOME = "https://www.raiplaysound.it/programmi/fantozziforever";
-    private WebView browser;
-    private ProgressBar progress;
-    private TextView status;
-    private Button backward;
-    private Button forward;
-
+    private static final String PROGRAM = "https://www.raiplaysound.it/programmi/fantozziforever";
+    // Titoli e durate della prima parte del catalogo verificati sulla fonte ufficiale.
+    private static final String[] TITLES = {
+        "La nascita di Fantozzi: dal cabaret alla televisione",
+        "Paolo Villaggio in tv: Fantozzi, Kranz e Fracchia",
+        "Fantozzi diventa un libro",
+        "Fantozzi al cinema: l'inizio di una lunga saga",
+        "Fantozzi e i coprotagonisti della saga",
+        "Fantozzi: anatomia di una maschera"
+    };
+    private static final int[] MINUTES = {23,24,24,28,27,25};
+    private final List<Integer> filtered = new ArrayList<>();
+    private SharedPreferences saved;
+    private BaseAdapter adapter;
+    private ListView list;
+    private EditText search;
+    private TextView count, selected;
+    private Button favorites;
+    private boolean onlyFavorites;
+    private int active = -1;
     @Override public void onCreate(Bundle state) {
         super.onCreate(state);
         setContentView(R.layout.activity_main);
-        progress = findViewById(R.id.loading);
-        status = findViewById(R.id.status);
-        browser = findViewById(R.id.browser);
-        backward = findViewById(R.id.back);
-        forward = findViewById(R.id.forward);
-
-        WebSettings settings = browser.getSettings();
-        settings.setJavaScriptEnabled(true); // RaiPlay Sound richiede JavaScript.
-        settings.setDomStorageEnabled(true);
-        settings.setMediaPlaybackRequiresUserGesture(true);
-        settings.setMixedContentMode(WebSettings.MIXED_CONTENT_NEVER_ALLOW);
-        settings.setAllowFileAccess(false);
-        settings.setAllowContentAccess(false);
-
-        browser.setWebChromeClient(new WebChromeClient() {
-            @Override public void onProgressChanged(WebView view, int percentage) {
-                progress.setProgress(percentage);
-                progress.setVisibility(percentage >= 100 ? View.GONE : View.VISIBLE);
+        saved = getSharedPreferences("catalogo_fantozzi", MODE_PRIVATE);
+        list = findViewById(R.id.episodes);
+        count = findViewById(R.id.count);
+        selected = findViewById(R.id.selected);
+        search = findViewById(R.id.search);
+        favorites = findViewById(R.id.favorites);
+        active = saved.getInt("selezionata", -1);
+        adapter = new BaseAdapter() {
+            @Override public int getCount() { return filtered.size(); }
+            @Override public Object getItem(int i) { return filtered.get(i); }
+            @Override public long getItemId(int i) { return filtered.get(i); }
+            @Override public View getView(int pos, View recycled, ViewGroup parent) {
+                View row = recycled == null ? LayoutInflater.from(MainActivity.this).inflate(R.layout.episode_row, parent, false) : recycled;
+                int index = filtered.get(pos);
+                ((TextView)row.findViewById(R.id.title)).setText((index+1)+". "+TITLES[index]);
+                ((TextView)row.findViewById(R.id.meta)).setText("27 marzo 2025  ·  "+MINUTES[index]+" min"+(active==index?"  ·  Selezionata":""));
+                TextView star = row.findViewById(R.id.star);
+                star.setText(saved.getBoolean("preferito_"+index,false)?"★":"☆");
+                star.setOnClickListener(v -> {
+                    saved.edit().putBoolean("preferito_"+index,!saved.getBoolean("preferito_"+index,false)).apply();
+                    updateList();
+                });
+                return row;
             }
+        };
+        list.setAdapter(adapter);
+        list.setOnItemClickListener((p,v,pos,id)->choose(filtered.get(pos)));
+        findViewById(R.id.listen).setOnClickListener(v -> {
+            if (active < 0) { android.widget.Toast.makeText(this,"Seleziona una puntata",android.widget.Toast.LENGTH_SHORT).show(); return; }
+            startActivity(new Intent(Intent.ACTION_VIEW,Uri.parse(PROGRAM)));
         });
-        browser.setWebViewClient(new WebViewClient() {
-            @Override public void onPageStarted(WebView view, String url, android.graphics.Bitmap favicon) {
-                status.setVisibility(View.GONE);
-                updateNavigation();
-            }
-            @Override public void onPageFinished(WebView view, String url) { updateNavigation(); }
-            @Override public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error) {
-                if (request.isForMainFrame()) showError(R.string.error_network);
-            }
-            @Override public void onReceivedHttpError(WebView view, WebResourceRequest request,
-                    android.webkit.WebResourceResponse response) {
-                if (request.isForMainFrame() && response.getStatusCode() >= 400) showError(R.string.error_page);
-            }
-            @Override public boolean onRenderProcessGone(WebView view, RenderProcessGoneDetail detail) {
-                // Non trattenere una WebView il cui processo è terminato.
-                ((android.view.ViewGroup)view.getParent()).removeView(view);
-                view.destroy();
-                browser = new WebView(MainActivity.this);
-                ((android.widget.LinearLayout)findViewById(R.id.browser_holder)).addView(browser,
-                        new android.widget.LinearLayout.LayoutParams(-1, -1));
-                showError(R.string.error_page);
-                // La nuova WebView non viene riutilizzata: riaprire l'Activity
-                // evita di assumere configurazioni incomplete.
-                findViewById(R.id.reload).setOnClickListener(v -> recreate());
-                return true;
-            }
-            @Override public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
-                Uri uri = request.getUrl();
-                String scheme = uri.getScheme();
-                if (!"https".equalsIgnoreCase(scheme)) {
-                    if ("intent".equalsIgnoreCase(scheme)) return true;
-                    openExternal(uri);
-                    return true;
-                }
-                String host = uri.getHost();
-                if (host != null && (host.equals("raiplaysound.it") || host.endsWith(".raiplaysound.it")
-                        || host.equals("rai.it") || host.endsWith(".rai.it"))) return false;
-                openExternal(uri);
-                return true;
-            }
+        findViewById(R.id.previous).setOnClickListener(v -> choose(Math.max(0,active-1)));
+        findViewById(R.id.next).setOnClickListener(v -> choose(active<0?0:Math.min(TITLES.length-1,active+1)));
+        favorites.setOnClickListener(v -> { onlyFavorites=!onlyFavorites; updateList(); });
+        search.addTextChangedListener(new TextWatcher() {
+            @Override public void beforeTextChanged(CharSequence s,int start,int c,int after){}
+            @Override public void onTextChanged(CharSequence s,int start,int before,int count){updateList();}
+            @Override public void afterTextChanged(Editable e){}
         });
-        bind(R.id.home, () -> browser.loadUrl(HOME));
-        bind(R.id.back, () -> { if (browser.canGoBack()) browser.goBack(); });
-        bind(R.id.forward, () -> { if (browser.canGoForward()) browser.goForward(); });
-        bind(R.id.reload, () -> browser.reload());
-        bind(R.id.external, () -> openExternal(Uri.parse(browser.getUrl() == null ? HOME : browser.getUrl())));
-        if (state == null || browser.restoreState(state) == null) browser.loadUrl(HOME);
-        updateNavigation();
+        findViewById(R.id.menu).setOnClickListener(v -> {
+            PopupMenu menu = new PopupMenu(this,v);
+            menu.getMenu().add("Cerca puntate").setOnMenuItemClickListener(item -> {
+                search.setVisibility(search.getVisibility()==View.VISIBLE?View.GONE:View.VISIBLE);
+                if(search.getVisibility()==View.VISIBLE) search.requestFocus();
+                return true;
+            });
+            menu.getMenu().add("Mostra tutte le puntate").setOnMenuItemClickListener(item -> {
+                onlyFavorites=false;search.setText("");updateList();return true;
+            });
+            menu.getMenu().add("Informazioni").setOnMenuItemClickListener(item -> {
+                new android.app.AlertDialog.Builder(this).setTitle("Fantozzi Forever Player")
+                    .setMessage("Interfaccia nativa ispirata a Successo Player. Il catalogo è in fase di integrazione e l'ascolto si apre ancora sul sito ufficiale. App non affiliata a Rai.")
+                    .setPositiveButton("Chiudi",null).show();return true;
+            });
+            menu.show();
+        });
+        if(active>=0 && active<TITLES.length) choose(active);
+        updateList();
     }
-    private void showError(int messageId) {
-        status.setText(messageId);
-        status.setVisibility(View.VISIBLE);
-        progress.setVisibility(View.GONE);
+    private void choose(int i) {
+        if(i<0 || i>=TITLES.length)return;
+        active=i;
+        saved.edit().putInt("selezionata",i).apply();
+        selected.setText((i+1)+". "+TITLES[i]);
+        updateList();
     }
-    private void updateNavigation() {
-        backward.setEnabled(browser.canGoBack());
-        forward.setEnabled(browser.canGoForward());
-    }
-    private void openExternal(Uri uri) {
-        try { startActivity(new Intent(Intent.ACTION_VIEW, uri)); }
-        catch (Exception ignored) { showError(R.string.error_page); }
-    }
-    private void bind(int id, Runnable action) {
-        ((Button)findViewById(id)).setOnClickListener(view -> action.run());
-    }
-    @Override protected void onSaveInstanceState(Bundle state) {
-        browser.saveState(state);
-        super.onSaveInstanceState(state);
-    }
-    @Override public void onBackPressed() {
-        if (browser.canGoBack()) browser.goBack();
-        else super.onBackPressed();
-    }
-    @Override protected void onDestroy() {
-        if (browser != null) browser.destroy();
-        super.onDestroy();
+    private void updateList(){
+        filtered.clear();
+        String query=search.getText().toString().toLowerCase(Locale.ITALIAN).trim();
+        for(int i=0;i<TITLES.length;i++)
+            if((!onlyFavorites || saved.getBoolean("preferito_"+i,false)) &&
+               TITLES[i].toLowerCase(Locale.ITALIAN).contains(query)) filtered.add(i);
+        favorites.setText(onlyFavorites?"★ Preferite":"☆ Tutte");
+        count.setText(filtered.size()+" puntate · catalogo parziale");
+        adapter.notifyDataSetChanged();
     }
 }

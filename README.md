@@ -1,28 +1,27 @@
 # Fantozzi Forever Player
 
-Applicazione Android non ufficiale in italiano per consultare e ascoltare [Fantozzi Forever su RaiPlay Sound](https://www.raiplaysound.it/programmi/fantozziforever).
+Applicazione Android indipendente in italiano, con **interfaccia nativa ispirata a Successo Player v5.0**.
 
-## Versione 0.2.2
+## v0.3.0
 
-- Accesso al sito ufficiale nella WebView dell'app.
-- Navigazione tra le pagine, aggiornamento, stato di caricamento e messaggi di errore in italiano.
-- Pulsante **Browser** per aprire la pagina corrente nel browser esterno, utile quando la riproduzione non è supportata dalla WebView.
-- Gestione delle interruzioni del processo WebView.
-- APK di prova pubblicato nelle GitHub Releases con versione letta dal progetto, evitando link temporanei agli artifact.
-- Il sistema di distribuzione produce APK di **debug**. Non esiste ancora un certificato permanente di produzione.
-
-**Limitazioni:** non è ancora un lettore Media3 nativo; non sono implementati mini-player, download offline, preferiti, avanzamento nativo o aggiornamento interno. La riproduzione dipende dal sito e deve essere provata su telefono.
+- Eliminata completamente la WebView.
+- Schermata con intestazione verde, catalogo nativo, righe puntate, filtro preferiti, ricerca e menu compatto ⋮.
+- Sei puntate con titoli e durata verificati sulla [pagina ufficiale](https://www.raiplaysound.it/programmi/fantozziforever), catalogo ancora parziale.
+- Selezione e preferiti memorizzati sul telefono.
+- Pannello inferiore fisso ispirato al mini-player di Successo Player.
+- La riproduzione **non è ancora nativa**. Il pulsante «Apri puntata» apre attualmente la pagina del programma nel browser; non è un controllo Play.
+- Nessun file audio viene fornito nel repository. Per Media3 servono URL audio affidabili e leciti.
 
 ## Compilazione
 
 Java 17, SDK Android 36, Gradle 8.11.1:
 
-```sh
+```bash
 gradle :app:assembleDebug
 ```
 
-Identificativo: `it.fantozziforever.player`, Android 8+.
+La pipeline GitHub Actions pubblica una Release APK di prova per ogni versione.
 
-## Diritti
+## Indipendenza
 
-Progetto indipendente, non affiliato a Rai né ai produttori. Il repository non contiene copie degli episodi.
+`applicationId`: `it.fantozziforever.player`. Il progetto originale [Successo Player](https://github.com/HGWells2001/Successo-Player-Android) non viene modificato. App non ufficiale e non affiliata a Rai.
