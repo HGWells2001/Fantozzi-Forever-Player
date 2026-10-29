@@ -1,39 +1,30 @@
 # Fantozzi Forever Player per Android
 
-Applicazione Android **non ufficiale**, in lingua italiana, dedicata all'ascolto di *Fantozzi Forever*, il programma disponibile su [RaiPlay Sound](https://www.raiplaysound.it/programmi/fantozziforever).
+Applicazione **non ufficiale e interamente in italiano**, dedicata a [Fantozzi Forever su RaiPlay Sound](https://www.raiplaysound.it/programmi/fantozziforever).
 
-> **Stato del progetto:** avvio dello sviluppo. Il lettore Android e l'APK non sono ancora disponibili in questo repository. Le funzionalità seguenti sono obiettivi di sviluppo, non funzionalità già distribuite.
+## Versione 0.1.0: prima base Android
 
-## Obiettivo
+Questa prima versione comprende un'app Android autonoma che apre il programma nel sito ufficiale tramite una WebView, con navigazione Puntate, Indietro, Avanti e Aggiorna, barra di caricamento, supporto JavaScript e apertura esterna dei collegamenti non Rai. Il catalogo e l'eventuale riproduzione restano gestiti dal sito RaiPlay Sound: **la riproduzione audio in WebView non è ancora verificata su dispositivo fisico**.
 
-Realizzare un lettore leggero e intuitivo per le puntate di *Fantozzi Forever*, con un'interfaccia compatta, un elenco ordinato delle puntate e la possibilità di riprendere l'ascolto da dove era stato interrotto.
+**Non sono ancora implementati**: Media3 nativo, mini-lettore, download offline, preferiti, progressi per puntata, ricerca nativa, coda, shuffle e aggiornamenti automatici. Sono previsti nelle versioni successive soltanto dopo aver verificato un accesso affidabile e consentito alle risorse audio.
 
-## Funzionalità previste
+## Compilazione
 
-- Catalogo puntate, titoli e descrizioni in italiano.
-- Riproduzione in primo piano e in background con Android Media3 / ExoPlayer.
-- Mini-lettore sempre visibile e barra di avanzamento.
-- Ripresa della riproduzione dal punto salvato.
-- Preferiti, cronologia, ricerca e coda personalizzata.
-- Download per l'ascolto offline, nel rispetto delle condizioni della fonte.
-- Timer di spegnimento e riproduzione casuale.
-- Comandi da notifiche, schermata di blocco e dispositivi Bluetooth.
-- Controllo degli aggiornamenti e distribuzione degli APK tramite GitHub Releases.
+Richiede Java 17, Android SDK 36 e Gradle 8.11.1. In locale:
 
-## Base tecnica
+```sh
+gradle :app:assembleDebug
+```
 
-Il progetto prende come riferimento l'architettura di [Successo Player Android](https://github.com/HGWells2001/Successo-Player-Android), senza alterare il progetto originale. La nuova applicazione avrà identificativo Android, dati locali, configurazione di aggiornamento e firma indipendenti.
+Il workflow GitHub Actions `Compila APK Android` esegue la compilazione e salva l'APK di debug fra gli artifact del workflow, se la compilazione va a buon fine. Nessuna firma di distribuzione o release stabile è ancora configurata.
 
-L'interfaccia, i messaggi, le impostazioni e la documentazione destinata agli utenti saranno in **italiano**.
+## Dati tecnici
 
-## Piano di sviluppo
+- Identificativo app: `it.fantozziforever.player`
+- Android 8.0 e successivi (minSdk 26)
+- targetSdk 35, compileSdk 36
+- Java 17
 
-1. Verifica della fonte ufficiale delle puntate e delle modalità di accesso consentite.
-2. Adattamento del codice del lettore all'identità della nuova applicazione.
-3. Eliminazione delle funzionalità specifiche di *Successo* (diretta programmata e proverbio del giorno).
-4. Verifiche di riproduzione, caricamento catalogo, progressi e ascolto offline.
-5. Compilazione, test e pubblicazione del primo APK firmato.
+## Nota sui diritti
 
-## Avvertenze
-
-Questo è un progetto indipendente, non ufficiale e senza affiliazione, approvazione o sponsorizzazione da parte di Rai, RaiPlay Sound o dei produttori del programma. I contenuti audio, i loghi, i titoli e le immagini appartengono ai rispettivi titolari. Il repository non distribuisce copie degli episodi.
+Progetto indipendente, non affiliato a Rai o ai produttori di *Fantozzi Forever*. Contenuti, immagini e marchi appartengono ai rispettivi titolari. Il codice non include copie degli episodi.

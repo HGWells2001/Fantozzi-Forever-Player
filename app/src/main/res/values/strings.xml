@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+<string name="app_name">Fantozzi Forever</string>
+<string name="home">Puntate</string>
+<string name="back">Indietro</string>
+<string name="forward">Avanti</string>
+<string name="reload">Aggiorna</string>
+<string name="external">Apri nel browser</string>
+<string name="about">Player indipendente per Fantozzi Forever. I contenuti sono riprodotti dal sito ufficiale RaiPlay Sound.</string>
+</resources>
