@@ -14,6 +14,7 @@ import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Button;
+import android.webkit.RenderProcessGoneDetail;
 
 public final class MainActivity extends Activity {
     private static final String HOME = "https://www.raiplaysound.it/programmi/fantozziforever";
@@ -59,6 +60,19 @@ public final class MainActivity extends Activity {
                     android.webkit.WebResourceResponse response) {
                 if (request.isForMainFrame() && response.getStatusCode() >= 400) showError(R.string.error_page);
             }
+            @Override public boolean onRenderProcessGone(WebView view, RenderProcessGoneDetail detail) {
+                // Non trattenere una WebView il cui processo è terminato.
+                ((android.view.ViewGroup)view.getParent()).removeView(view);
+                view.destroy();
+                browser = new WebView(MainActivity.this);
+                ((android.widget.LinearLayout)findViewById(R.id.browser_holder)).addView(browser,
+                        new android.widget.LinearLayout.LayoutParams(-1, -1));
+                showError(R.string.error_page);
+                // La nuova WebView non viene riutilizzata: riaprire l'Activity
+                // evita di assumere configurazioni incomplete.
+                findViewById(R.id.reload).setOnClickListener(v -> recreate());
+                return true;
+            }
             @Override public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
                 Uri uri = request.getUrl();
                 String scheme = uri.getScheme();
@@ -78,6 +92,7 @@ public final class MainActivity extends Activity {
         bind(R.id.back, () -> { if (browser.canGoBack()) browser.goBack(); });
         bind(R.id.forward, () -> { if (browser.canGoForward()) browser.goForward(); });
         bind(R.id.reload, () -> browser.reload());
+        bind(R.id.external, () -> openExternal(Uri.parse(browser.getUrl() == null ? HOME : browser.getUrl())));
         if (state == null || browser.restoreState(state) == null) browser.loadUrl(HOME);
         updateNavigation();
     }
@@ -106,7 +121,7 @@ public final class MainActivity extends Activity {
         else super.onBackPressed();
     }
     @Override protected void onDestroy() {
-        browser.destroy();
+        if (browser != null) browser.destroy();
         super.onDestroy();
     }
 }

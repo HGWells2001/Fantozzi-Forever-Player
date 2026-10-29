@@ -5,6 +5,7 @@
 <string name="back">Indietro</string>
 <string name="forward">Avanti</string>
 <string name="reload">Aggiorna</string>
+<string name="external">Browser</string>
 <string name="loading">Caricamento delle puntate…</string>
 <string name="error_network">Impossibile caricare la pagina. Controlla la connessione e premi Aggiorna.</string>
 <string name="error_page">La pagina non è disponibile. Premi Aggiorna per riprovare.</string>

@@ -3,6 +3,9 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
+concurrency:
+  group: distribuzione-android
+  cancel-in-progress: false
 jobs:
   compila:
     runs-on: ubuntu-latest
@@ -25,17 +28,25 @@ jobs:
           if [ ! -x "$SDKMANAGER" ]; then SDKMANAGER="$(command -v sdkmanager)"; fi
           yes | "$SDKMANAGER" --licenses > /dev/null || true
           "$SDKMANAGER" --install "platforms;android-36" "build-tools;35.0.0"
+      - name: Leggi versione applicazione
+        shell: bash
+        run: |
+          VERSION=$(sed -n "s/^[[:space:]]*versionName '\([^']*\)'/\1/p" app/build.gradle)
+          test -n "$VERSION"
+          echo "VERSION=$VERSION" >> "$GITHUB_ENV"
       - name: Compila APK
         run: gradle --no-daemon :app:assembleDebug
       - name: Prepara APK per il download diretto
-        run: cp app/build/outputs/apk/debug/app-debug.apk FantozziForever_v0.2.1_debug.apk
+        shell: bash
+        run: cp app/build/outputs/apk/debug/app-debug.apk "FantozziForever_v${VERSION}_debug.apk"
       - uses: actions/upload-artifact@v4
         with:
           name: FantozziForever-debug
-          path: FantozziForever_v0.2.1_debug.apk
+          path: FantozziForever_v*.apk
           if-no-files-found: error
       - name: Pubblica Release scaricabile senza accesso
         env:
           GH_TOKEN: ${{ github.token }}
+        shell: bash
         run: |
-          gh release create v0.2.1 FantozziForever_v0.2.1_debug.apk --target "$GITHUB_SHA" --title "Fantozzi Forever 0.2.1" --notes "Prima versione di prova in italiano. APK di debug, non firmato con una chiave di distribuzione permanente. Il lettore utilizza il sito ufficiale tramite WebView." --prerelease --verify-tag=false
+          gh release create "v${VERSION}" "FantozziForever_v${VERSION}_debug.apk" --target "$GITHUB_SHA" --title "Fantozzi Forever ${VERSION}" --notes "Versione di prova in italiano. APK di debug, non firmato con una chiave permanente. L'ascolto dipende dal sito ufficiale RaiPlay Sound." --prerelease

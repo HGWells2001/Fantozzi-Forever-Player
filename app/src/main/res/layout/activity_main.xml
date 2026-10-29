@@ -4,11 +4,12 @@
     <TextView android:id="@+id/info" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/about" android:textColor="#4A3A37" android:textSize="12sp" android:padding="9dp"/>
     <ProgressBar android:id="@+id/loading" style="?android:attr/progressBarStyleHorizontal" android:layout_width="match_parent" android:layout_height="3dp" android:max="100"/>
     <TextView android:id="@+id/status" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/loading" android:textSize="12sp" android:padding="8dp" android:visibility="gone" android:textColor="#672D2D"/>
-    <WebView android:id="@+id/browser" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1"/>
+    <LinearLayout android:id="@+id/browser_holder" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1"><WebView android:id="@+id/browser" android:layout_width="match_parent" android:layout_height="match_parent"/></LinearLayout>
     <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:background="#472B31" android:gravity="center">
         <Button android:id="@+id/home" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:text="@string/home" android:textSize="11sp"/>
         <Button android:id="@+id/back" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:text="@string/back" android:textSize="11sp"/>
         <Button android:id="@+id/forward" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:text="@string/forward" android:textSize="11sp"/>
         <Button android:id="@+id/reload" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:text="@string/reload" android:textSize="11sp"/>
+        <Button android:id="@+id/external" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:text="@string/external" android:textSize="10sp"/>
     </LinearLayout>
 </LinearLayout>
