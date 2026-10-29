@@ -1,32 +1,44 @@
-# Firma permanente degli APK
+# Configurazione automatica della firma Android
 
-Per poter aggiornare Fantozzi Forever direttamente dall'app occorre utilizzare **sempre lo stesso keystore Android** per tutte le Release.
+Per aggiornare Fantozzi Forever Player senza disinstallarlo serve una sola chiave di firma Android permanente.
 
-## Prima configurazione (Windows)
+## Prerequisiti
 
-Creare il keystore una sola volta su un computer sicuro (Java `keytool`):
+Windows 10/11, Windows PowerShell 5.1 o PowerShell 7, Java JDK 17 con keytool, GitHub CLI con permessi di gestione dei Secrets.
 
-```powershell
-keytool -genkeypair -v -keystore fantozzi-permanente.jks -alias fantozzi -keyalg RSA -keysize 3072 -validity 10000
-```
+Per installare GitHub CLI (se manca):
 
-Conservare il file `.jks`, l'alias e le password in un luogo sicuro, **fuori dal repository**. Per convertire il file in Base64 da PowerShell:
+~~~powershell
+winget install --id GitHub.cli --exact
+~~~
 
-```powershell
-[Convert]::ToBase64String([IO.File]::ReadAllBytes("C:\\percorso\\fantozzi-permanente.jks")) | Set-Clipboard
-```
+## Come eseguire lo script
 
-In GitHub aprire **Repository > Settings > Secrets and variables > Actions > New repository secret** e creare:
+Da PowerShell, scarica lo script ufficiale del tuo repository e avvialo:
 
-- `FF_KEYSTORE_BASE64`: contenuto Base64 del file `.jks`;
-- `FF_STORE_PASSWORD`: password del keystore;
-- `FF_KEY_ALIAS`: alias della chiave (es. `fantozzi`);
-- `FF_KEY_PASSWORD`: password della chiave.
+~~~powershell
+Invoke-WebRequest "https://raw.githubusercontent.com/HGWells2001/Fantozzi-Forever-Player/main/tools/Configura-Firma-Permanente.ps1" -OutFile ".\Configura-Firma-Permanente.ps1"
+powershell -NoProfile -ExecutionPolicy Bypass -File ".\Configura-Firma-Permanente.ps1"
+~~~
 
-Dopo la configurazione, ogni nuova build pubblicata dal workflow `Compila e pubblica APK Android` sarà firmata con quel certificato. Gli APK saranno pubblicati come `*_release.apk` e saranno compatibili con i successivi aggiornamenti, purché `applicationId`, firma e `versionCode` restino coerenti.
+Non servono i privilegi di amministratore. La prima volta GitHub CLI può richiedere l'accesso tramite browser.
 
-## Attenzione agli APK precedenti
+Lo script genera una chiave RSA a 3072 bit, un keystore e una password casuale forte, poi invia automaticamente quattro Secrets a GitHub: FF_KEYSTORE_BASE64, FF_STORE_PASSWORD, FF_KEY_ALIAS, FF_KEY_PASSWORD. Le password passano via STDIN, non negli argomenti di un processo.
 
-Le versioni 0.2 e 0.3 sono APK di debug firmati con chiavi temporanee: non è garantita la compatibilità con la nuova firma. **Non disinstallare l'app precedente senza aver valutato la perdita dei preferiti e dei dati locali.** L'app controlla la firma prima di proporre l'installazione.
+**Sicurezza:** il keystore non viene creato nel repository ma in %LOCALAPPDATA%\FantozziForever\Firma. La password viene salvata in credenziali-dpapi.xml, protetta dall'account Windows corrente. Per vedere la password e conservarla nel tuo gestore di password:
 
-Se i segreti mancano completamente, il workflow pubblica per compatibilità un APK di prova con suffisso `_debug.apk`; questo **non rende possibili aggiornamenti affidabili**. Se è configurata solo una parte dei segreti, la compilazione fallisce intenzionalmente invece di pubblicare un APK dalla firma inattesa.
+~~~powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File ".\Configura-Firma-Permanente.ps1" -MostraPassword
+~~~
+
+Fai un backup sicuro sia del keystore sia della password. Il file DPAPI non è normalmente utilizzabile da un altro account Windows.
+
+## Riutilizzo, protezioni e compilazione
+
+La firma viene generata solo quando non esiste né sul PC né come Secrets su GitHub. Lo script non sostituisce chiavi esistenti; in caso di Secrets parziali interrompe la configurazione. Usa **-SovrascriviSegreti** soltanto per riconfigurare GitHub con il keystore originale già verificato.
+
+Dopo la configurazione, verifica i Secrets in GitHub, Settings > Secrets and variables > Actions. La prossima versione con versionCode e versionName incrementati in app/build.gradle sarà firmata automaticamente dal workflow e produrrà un file con suffisso _release.apk.
+
+**Importante:** non lanciare la vecchia versione 0.4.0 già pubblicata: per la prossima Release bisogna aumentare la versione. I vecchi APK di debug potrebbero non essere aggiornabili mantenendo i dati perché il certificato è differente. Non disinstallarli senza valutare la perdita dei preferiti.
+
+Lo script non avvia automaticamente una Release per evitare di sovrascrivere un tag esistente.

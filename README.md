@@ -17,7 +17,7 @@ Applicazione Android non ufficiale in italiano, con catalogo nativo ispirato a S
 
 Le versioni fino alla **0.3.0** sono state compilate e pubblicate come APK di debug dai runner temporanei di GitHub. Di norma **non condividono lo stesso certificato** e non possono quindi aggiornarsi conservando i dati. L'app **blocca** il tentativo se la firma non coincide.
 
-Per avere aggiornamenti installabili uno sopra l'altro, configurare un'unica chiave di firma permanente seguendo [ISTRUZIONI_FIRMA.md](docs/ISTRUZIONI_FIRMA.md). Non caricare mai la chiave privata nel repository.
+Per avere aggiornamenti installabili uno sopra l'altro, configurare un'unica chiave di firma permanente con lo [script PowerShell automatico](tools/Configura-Firma-Permanente.ps1) e le [istruzioni](docs/ISTRUZIONI_FIRMA.md). Non caricare mai la chiave privata nel repository.
 
 La prima transizione da un vecchio APK di debug a un APK con firma permanente **non garantisce la conservazione dei dati**. Le release successive firmate con la stessa chiave potranno aggiornarsi normalmente.
 

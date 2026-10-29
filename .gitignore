@@ -1,0 +1,17 @@
+# Protezione file di firma e segreti
+*.jks
+*.keystore
+*.p12
+*.pfx
+*.cred.xml
+credenziali-dpapi.xml
+.env
+.env.*
+# File Android generati
+.gradle/
+build/
+app/build/
+local.properties
+*.apk
+*.aab
+*.part
