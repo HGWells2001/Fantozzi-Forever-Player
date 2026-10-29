@@ -1,7 +1,7 @@
 name: Compila e pubblica APK Android
 on:
   push:
-    branches: [main]
+    branches: [main, sviluppo-v0.5-media3]
   workflow_dispatch:
 concurrency:
   group: distribuzione-android
@@ -119,6 +119,7 @@ jobs:
             exit 1
           }
       - name: Pubblica GitHub Release (senza sovrascrivere tag esistenti)
+        if: github.ref == 'refs/heads/main'
         env:
           GH_TOKEN: ${{ github.token }}
         shell: bash
