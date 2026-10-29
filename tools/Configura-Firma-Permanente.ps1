@@ -143,10 +143,32 @@ if ($esisteChiave) {
         Remove-Item Env:FF_FIRMA_PASSWORD_TEMP -ErrorAction SilentlyContinue
     }
 }
+# Con PowerShell 5.1, i messaggi informativi di keytool su stderr possono
+# essere promossi a NativeCommandError con ErrorActionPreference=Stop.
+# Avviamo keytool come processo e controlliamo soltanto l'exit code.
+# La password passa tramite variabile d'ambiente, mai negli argomenti.
 $env:FF_FIRMA_PASSWORD_TEMP = $password
 try {
-    & $keytool -list -keystore $keystore -storetype JKS -alias $Alias '-storepass:env' FF_FIRMA_PASSWORD_TEMP *> $null
-    if ($LASTEXITCODE -ne 0) { throw 'Verifica keystore fallita: controlla password e alias.' }
+    $processInfo = New-Object System.Diagnostics.ProcessStartInfo
+    $processInfo.FileName = $keytool
+    $processInfo.Arguments = '-list -keystore "' + $keystore + '" -storetype JKS -alias ' + $Alias + ' -storepass:env FF_FIRMA_PASSWORD_TEMP'
+    $processInfo.UseShellExecute = $false
+    $processInfo.CreateNoWindow = $true
+    $processInfo.RedirectStandardOutput = $true
+    $processInfo.RedirectStandardError = $true
+    $verificaProcesso = [System.Diagnostics.Process]::Start($processInfo)
+    if ($null -eq $verificaProcesso) { throw 'Impossibile avviare keytool per la verifica.' }
+    try {
+        $outputVerifica = $verificaProcesso.StandardOutput.ReadToEnd()
+        $erroreVerifica = $verificaProcesso.StandardError.ReadToEnd()
+        $verificaProcesso.WaitForExit()
+        if ($verificaProcesso.ExitCode -ne 0) {
+            throw ('Verifica keystore fallita (codice ' + $verificaProcesso.ExitCode + '): ' + $erroreVerifica.Trim())
+        }
+    } finally {
+        $verificaProcesso.Dispose()
+    }
+    Write-Host 'Keystore e alias verificati correttamente.' -ForegroundColor Green
 } finally {
     Remove-Item Env:FF_FIRMA_PASSWORD_TEMP -ErrorAction SilentlyContinue
 }
