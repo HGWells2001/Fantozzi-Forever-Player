@@ -1,4 +1,4 @@
-name: Compila APK Android
+name: Compila e pubblica APK Android
 on:
   push:
     branches: [main]
@@ -7,7 +7,7 @@ jobs:
   compila:
     runs-on: ubuntu-latest
     permissions:
-      contents: read
+      contents: write
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v4
@@ -21,16 +21,21 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          echo "ANDROID_HOME=$ANDROID_HOME"
           SDKMANAGER="$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager"
           if [ ! -x "$SDKMANAGER" ]; then SDKMANAGER="$(command -v sdkmanager)"; fi
           yes | "$SDKMANAGER" --licenses > /dev/null || true
           "$SDKMANAGER" --install "platforms;android-36" "build-tools;35.0.0"
-      - name: Compila APK di debug
+      - name: Compila APK
         run: gradle --no-daemon :app:assembleDebug
+      - name: Prepara APK per il download diretto
+        run: cp app/build/outputs/apk/debug/app-debug.apk FantozziForever_v0.2.1_debug.apk
       - uses: actions/upload-artifact@v4
-        if: success()
         with:
           name: FantozziForever-debug
-          path: app/build/outputs/apk/debug/*.apk
+          path: FantozziForever_v0.2.1_debug.apk
           if-no-files-found: error
+      - name: Pubblica Release scaricabile senza accesso
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create v0.2.1 FantozziForever_v0.2.1_debug.apk --target "$GITHUB_SHA" --title "Fantozzi Forever 0.2.1" --notes "Prima versione di prova in italiano. APK di debug, non firmato con una chiave di distribuzione permanente. Il lettore utilizza il sito ufficiale tramite WebView." --prerelease --verify-tag=false
