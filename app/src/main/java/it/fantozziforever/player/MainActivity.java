@@ -41,11 +41,13 @@ public final class MainActivity extends Activity {
     private TextView count, selected;
     private Button favorites;
     private boolean onlyFavorites;
+    private UpdateChecker updater;
     private int active = -1;
     @Override public void onCreate(Bundle state) {
         super.onCreate(state);
         setContentView(R.layout.activity_main);
         saved = getSharedPreferences("catalogo_fantozzi", MODE_PRIVATE);
+        updater = new UpdateChecker(this);
         list = findViewById(R.id.episodes);
         count = findViewById(R.id.count);
         selected = findViewById(R.id.selected);
@@ -94,6 +96,9 @@ public final class MainActivity extends Activity {
             menu.getMenu().add("Mostra tutte le puntate").setOnMenuItemClickListener(item -> {
                 onlyFavorites=false;search.setText("");updateList();return true;
             });
+            menu.getMenu().add("Aggiornamenti").setOnMenuItemClickListener(item -> {
+                updater.check(true); return true;
+            });
             menu.getMenu().add("Informazioni").setOnMenuItemClickListener(item -> {
                 new android.app.AlertDialog.Builder(this).setTitle("Fantozzi Forever Player")
                     .setMessage("Interfaccia nativa ispirata a Successo Player. Il catalogo è in fase di integrazione e l'ascolto si apre ancora sul sito ufficiale. App non affiliata a Rai.")
@@ -103,6 +108,11 @@ public final class MainActivity extends Activity {
         });
         if(active>=0 && active<TITLES.length) choose(active);
         updateList();
+        updater.check(false);
+    }
+    @Override protected void onResume() {
+        super.onResume();
+        if (updater != null) updater.onResume();
     }
     private void choose(int i) {
         if(i<0 || i>=TITLES.length)return;

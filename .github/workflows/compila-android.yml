@@ -28,25 +28,68 @@ jobs:
           if [ ! -x "$SDKMANAGER" ]; then SDKMANAGER="$(command -v sdkmanager)"; fi
           yes | "$SDKMANAGER" --licenses > /dev/null || true
           "$SDKMANAGER" --install "platforms;android-36" "build-tools;35.0.0"
+      - name: Esegui test versioni
+        run: |
+          mkdir -p build/tests
+          javac -d build/tests app/src/main/java/it/fantozziforever/player/ReleaseVersion.java tools/tests/ReleaseVersionTest.java
+          java -cp build/tests ReleaseVersionTest
       - name: Leggi versione applicazione
         shell: bash
         run: |
           VERSION=$(sed -n "s/^[[:space:]]*versionName '\([^']*\)'/\1/p" app/build.gradle)
           test -n "$VERSION"
           echo "VERSION=$VERSION" >> "$GITHUB_ENV"
-      - name: Compila APK
-        run: gradle --no-daemon :app:assembleDebug
-      - name: Prepara APK per il download diretto
+      - name: Prepara eventuale firma permanente
+        id: firma
         shell: bash
-        run: cp app/build/outputs/apk/debug/app-debug.apk "FantozziForever_v${VERSION}_debug.apk"
+        env:
+          KEYSTORE_BASE64: ${{ secrets.FF_KEYSTORE_BASE64 }}
+          STORE_PASSWORD: ${{ secrets.FF_STORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.FF_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.FF_KEY_PASSWORD }}
+        run: |
+          set -euo pipefail
+          if [[ -z "$KEYSTORE_BASE64" && -z "$STORE_PASSWORD" && -z "$KEY_ALIAS" && -z "$KEY_PASSWORD" ]]; then
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+            echo "Firma permanente non configurata. APK di prova."
+          elif [[ -n "$KEYSTORE_BASE64" && -n "$STORE_PASSWORD" && -n "$KEY_ALIAS" && -n "$KEY_PASSWORD" ]]; then
+            printf '%s' "$KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/fantozzi-firma.jks"
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "Secrets di firma incompleti" >&2
+            exit 1
+          fi
+      - name: Compila APK firmato per aggiornamenti
+        if: steps.firma.outputs.enabled == 'true'
+        env:
+          FF_KEYSTORE_FILE: ${{ runner.temp }}/fantozzi-firma.jks
+          FF_KEYSTORE_PASSWORD: ${{ secrets.FF_STORE_PASSWORD }}
+          FF_KEY_ALIAS: ${{ secrets.FF_KEY_ALIAS }}
+          FF_KEY_PASSWORD: ${{ secrets.FF_KEY_PASSWORD }}
+        run: gradle --no-daemon :app:assembleRelease
+      - name: Compila APK di prova
+        if: steps.firma.outputs.enabled != 'true'
+        run: gradle --no-daemon :app:assembleDebug
+      - name: Prepara APK
+        shell: bash
+        run: |
+          if [[ "${{ steps.firma.outputs.enabled }}" == "true" ]]; then
+            cp app/build/outputs/apk/release/app-release.apk "FantozziForever_v${VERSION}_release.apk"
+            echo "APK=FantozziForever_v${VERSION}_release.apk" >> "$GITHUB_ENV"
+            echo "TIPO=firmato con certificato permanente" >> "$GITHUB_ENV"
+          else
+            cp app/build/outputs/apk/debug/app-debug.apk "FantozziForever_v${VERSION}_debug.apk"
+            echo "APK=FantozziForever_v${VERSION}_debug.apk" >> "$GITHUB_ENV"
+            echo "TIPO=di debug; potrebbe non aggiornare versioni precedenti" >> "$GITHUB_ENV"
+          fi
       - uses: actions/upload-artifact@v4
         with:
-          name: FantozziForever-debug
+          name: FantozziForever-APK
           path: FantozziForever_v*.apk
           if-no-files-found: error
-      - name: Pubblica Release scaricabile senza accesso
+      - name: Pubblica GitHub Release
         env:
           GH_TOKEN: ${{ github.token }}
         shell: bash
         run: |
-          gh release create "v${VERSION}" "FantozziForever_v${VERSION}_debug.apk" --target "$GITHUB_SHA" --title "Fantozzi Forever ${VERSION}" --notes "Versione di prova in italiano. APK di debug, non firmato con una chiave permanente. L'ascolto dipende dal sito ufficiale RaiPlay Sound." --prerelease
+          gh release create "v${VERSION}" "$APK" --target "$GITHUB_SHA"             --title "Fantozzi Forever ${VERSION}"             --notes "Aggiornamenti direttamente dall'app. APK ${TIPO}. Prima di installare, l'app verifica integrità SHA-256, identificativo, versione e firma; Android richiede la conferma dell'utente."             --prerelease

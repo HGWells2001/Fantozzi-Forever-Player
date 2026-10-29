@@ -6,8 +6,27 @@ android {
   applicationId 'it.fantozziforever.player'
   minSdk 26
   targetSdk 35
-  versionCode 5
-  versionName '0.3.0'
+  versionCode 6
+  versionName '0.4.0'
+ }
+ signingConfigs {
+  permanente {
+   if (System.getenv("FF_KEYSTORE_FILE")) {
+    storeFile file(System.getenv("FF_KEYSTORE_FILE"))
+    storePassword System.getenv("FF_KEYSTORE_PASSWORD")
+    keyAlias System.getenv("FF_KEY_ALIAS")
+    keyPassword System.getenv("FF_KEY_PASSWORD")
+   }
+  }
+ }
+ buildTypes {
+  release {
+   minifyEnabled false
+   if (System.getenv("FF_KEYSTORE_FILE")) signingConfig signingConfigs.permanente
+  }
  }
  compileOptions { sourceCompatibility JavaVersion.VERSION_17; targetCompatibility JavaVersion.VERSION_17 }
+}
+dependencies {
+ implementation 'androidx.core:core:1.16.0'
 }

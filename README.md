@@ -1,27 +1,38 @@
 # Fantozzi Forever Player
 
-Applicazione Android indipendente in italiano, con **interfaccia nativa ispirata a Successo Player v5.0**.
+Applicazione Android non ufficiale in italiano, con catalogo nativo ispirato a Successo Player v5.0 e collegamento agli episodi ufficiali su RaiPlay Sound.
 
-## v0.3.0
+## Versione 0.4.0: aggiornamenti dall'app
 
-- Eliminata completamente la WebView.
-- Schermata con intestazione verde, catalogo nativo, righe puntate, filtro preferiti, ricerca e menu compatto ⋮.
-- Sei puntate con titoli e durata verificati sulla [pagina ufficiale](https://www.raiplaysound.it/programmi/fantozziforever), catalogo ancora parziale.
-- Selezione e preferiti memorizzati sul telefono.
-- Pannello inferiore fisso ispirato al mini-player di Successo Player.
-- La riproduzione **non è ancora nativa**. Il pulsante «Apri puntata» apre attualmente la pagina del programma nel browser; non è un controllo Play.
-- Nessun file audio viene fornito nel repository. Per Media3 servono URL audio affidabili e leciti.
+- Controllo di nuove versioni all'avvio e voce **Aggiornamenti** nel menu ⋮.
+- Lettura delle GitHub Releases pubbliche, incluse le versioni di prova.
+- Richiesta di conferma prima del download.
+- Download dell'APK in una cartella privata temporanea, con avanzamento, annullamento e verifica **SHA-256**.
+- Controllo dell'identificativo Android, del `versionCode` e della **firma digitale** prima di aprire l'installer.
+- Installazione con il consenso dell'utente attraverso il sistema Android e `FileProvider`.
+- Nessuna richiesta di accesso generale ai file del dispositivo.
+- Workflow GitHub Actions predisposto per firma permanente attraverso quattro repository secrets.
+
+### Limite fondamentale della firma
+
+Le versioni fino alla **0.3.0** sono state compilate e pubblicate come APK di debug dai runner temporanei di GitHub. Di norma **non condividono lo stesso certificato** e non possono quindi aggiornarsi conservando i dati. L'app **blocca** il tentativo se la firma non coincide.
+
+Per avere aggiornamenti installabili uno sopra l'altro, configurare un'unica chiave di firma permanente seguendo [ISTRUZIONI_FIRMA.md](docs/ISTRUZIONI_FIRMA.md). Non caricare mai la chiave privata nel repository.
+
+La prima transizione da un vecchio APK di debug a un APK con firma permanente **non garantisce la conservazione dei dati**. Le release successive firmate con la stessa chiave potranno aggiornarsi normalmente.
+
+### Funzioni attuali e limitazioni
+
+Catalogo nativo parziale, ricerca, preferiti, selezione delle puntate e pannello inferiore fisso. La riproduzione **non è ancora nativa Media3**: il pulsante apre il sito ufficiale nel browser. L'app non distribuisce audio o immagini protette.
 
 ## Compilazione
 
-Java 17, SDK Android 36, Gradle 8.11.1:
+Java 17, Android SDK 36, Gradle 8.11.1:
 
 ```bash
 gradle :app:assembleDebug
 ```
 
-La pipeline GitHub Actions pubblica una Release APK di prova per ogni versione.
+Identificativo `it.fantozziforever.player`, Android 8.0+.
 
-## Indipendenza
-
-`applicationId`: `it.fantozziforever.player`. Il progetto originale [Successo Player](https://github.com/HGWells2001/Successo-Player-Android) non viene modificato. App non ufficiale e non affiliata a Rai.
+Progetto indipendente, non affiliato a Rai o ai produttori di *Fantozzi Forever*. Tutti i contenuti e marchi appartengono ai rispettivi titolari.
