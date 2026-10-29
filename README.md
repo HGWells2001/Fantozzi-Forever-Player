@@ -2,6 +2,14 @@
 
 App Android indipendente in italiano, con interfaccia compatta ispirata a Successo Player v5.0 e catalogo ufficiale di Fantozzi Forever.
 
+## Versione 0.5.1
+
+- Rimosso il filtro delle puntate preferite e il relativo pulsante.
+- Eliminata la voce "Mostra tutte" collegata al filtro.
+- Tutte le puntate sono visibili; la ricerca continua a funzionare.
+- Le stelle continuano a salvare i preferiti, senza nascondere gli episodi.
+- Controllo automatico in CI contro il ripristino involontario del filtro.
+
 ## Versione 0.5.0
 
 - Catalogo **completo di 10 puntate** con titoli e durate verificati sulla pagina ufficiale RaiPlay Sound.
@@ -15,7 +23,7 @@ App Android indipendente in italiano, con interfaccia compatta ispirata a Succes
 
 ## Compilazione
 
-Java 17, Android SDK 36, Gradle 8.11.1. Il workflow GitHub Actions pubblica l'APK firmato con il keystore permanente già configurato. Versione 0.5.0, versionCode 8, applicationId it.fantozziforever.player.
+Java 17, Android SDK 36, Gradle 8.11.1. Il workflow GitHub Actions pubblica l'APK firmato con il keystore permanente già configurato. Versione 0.5.1, versionCode 9, applicationId it.fantozziforever.player.
 
 Documentazione: [Configurazione firma](docs/ISTRUZIONI_FIRMA.md).
 

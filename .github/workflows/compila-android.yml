@@ -37,6 +37,8 @@ jobs:
         run: |
           javac -d build/tests app/src/main/java/it/fantozziforever/player/CatalogTitles.java tools/tests/CatalogTitlesTest.java
           java -cp build/tests CatalogTitlesTest
+      - name: Verifica assenza filtro preferiti
+        run: python3 tools/check_no_favorites_filter.py
       - name: Leggi versione applicazione
         shell: bash
         run: |

@@ -56,10 +56,9 @@ public final class MainActivity extends Activity {
     private EditText search;
     private TextView count, selected, status, times;
     private SeekBar seek;
-    private Button listen, favorites;
+    private Button listen;
     private MediaController controller;
     private ListenableFuture<MediaController> controllerFuture;
-    private boolean onlyFavorites;
     private boolean dragging;
     private int active = -1;
 
@@ -90,7 +89,6 @@ public final class MainActivity extends Activity {
         times = findViewById(R.id.times);
         seek = findViewById(R.id.seek);
         listen = findViewById(R.id.listen);
-        favorites = findViewById(R.id.favorites);
         active = prefs.getInt("selezionata", -1);
         for (int i = 0; i < stream.length; i++) {
             pages[i] = PROGRAM;
@@ -128,7 +126,6 @@ public final class MainActivity extends Activity {
         listen.setOnClickListener(v -> toggle());
         findViewById(R.id.previous).setOnClickListener(v -> move(-1));
         findViewById(R.id.next).setOnClickListener(v -> move(1));
-        favorites.setOnClickListener(v -> { onlyFavorites = !onlyFavorites; updateList(); });
         search.addTextChangedListener(new TextWatcher() {
             @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
             @Override public void onTextChanged(CharSequence s, int start, int before, int count) { updateList(); }
@@ -152,9 +149,6 @@ public final class MainActivity extends Activity {
                 if (search.getVisibility() == View.VISIBLE) search.requestFocus();
                 return true;
             });
-            menu.getMenu().add("Mostra tutte").setOnMenuItemClickListener(item -> {
-                onlyFavorites = false; search.setText(""); updateList(); return true;
-            });
             menu.getMenu().add("Aggiorna catalogo").setOnMenuItemClickListener(item -> {
                 refreshCatalog(true); return true;
             });
@@ -163,7 +157,7 @@ public final class MainActivity extends Activity {
             });
             menu.getMenu().add("Informazioni").setOnMenuItemClickListener(item -> {
                 new AlertDialog.Builder(this).setTitle("Fantozzi Forever Player")
-                        .setMessage("Versione 0.5.0 · App indipendente in italiano. "
+                        .setMessage("Versione 0.5.1 · App indipendente in italiano. "
                                 + "Catalogo e audio provengono dalla piattaforma RaiPlay Sound.")
                         .setPositiveButton("Chiudi", null).show();
                 return true;
@@ -316,10 +310,8 @@ public final class MainActivity extends Activity {
         filtered.clear();
         String q = search.getText().toString().trim().toLowerCase(Locale.ITALIAN);
         for (int i = 0; i < CatalogTitles.TITLES.length; i++) {
-            if ((!onlyFavorites || prefs.getBoolean("preferito_" + i, false)) &&
-                    CatalogTitles.TITLES[i].toLowerCase(Locale.ITALIAN).contains(q)) filtered.add(i);
+            if (CatalogTitles.TITLES[i].toLowerCase(Locale.ITALIAN).contains(q)) filtered.add(i);
         }
-        favorites.setText(onlyFavorites ? "★ Preferite" : "☆ Tutte");
         count.setText(filtered.size() + " di " + CatalogTitles.TITLES.length + " puntate");
         adapter.notifyDataSetChanged();
     }
