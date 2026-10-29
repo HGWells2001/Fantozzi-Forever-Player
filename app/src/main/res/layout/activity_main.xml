@@ -3,28 +3,58 @@
  android:layout_width="match_parent" android:layout_height="match_parent"
  android:padding="12dp" android:orientation="vertical" android:background="@color/bg">
  <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
- android:orientation="horizontal" android:padding="12dp" android:gravity="center_vertical" android:background="@color/header">
- <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical">
- <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="FANTOZZI FOREVER" android:textColor="@color/headerText" android:textStyle="bold" android:textSize="20sp"/>
- <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Le storie del ragionier Ugo" android:textColor="@color/headerText" android:textSize="12sp"/>
+  android:orientation="horizontal" android:padding="12dp" android:gravity="center_vertical"
+  android:background="@color/header">
+  <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+   android:layout_weight="1" android:orientation="vertical">
+   <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+    android:text="FANTOZZI FOREVER" android:textColor="@color/headerText"
+    android:textStyle="bold" android:textSize="20sp"/>
+   <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+    android:text="Il ragioniere più famoso d'Italia" android:textColor="@color/headerText"
+    android:textSize="12sp"/>
+  </LinearLayout>
+  <Button android:id="@+id/menu" android:layout_width="48dp" android:layout_height="48dp"
+   android:text="⋮" android:textSize="24sp" android:contentDescription="Apri il menu"/>
  </LinearLayout>
- <Button android:id="@+id/menu" android:layout_width="48dp" android:layout_height="48dp" android:text="⋮" android:textSize="24sp" android:contentDescription="Apri il menu"/>
+ <EditText android:id="@+id/search" android:layout_width="match_parent"
+  android:layout_height="48dp" android:layout_marginTop="8dp" android:hint="Cerca una puntata…"
+  android:singleLine="true" android:visibility="gone" android:padding="8dp"
+  android:background="@color/panel"/>
+ <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+  android:orientation="horizontal" android:gravity="center_vertical" android:paddingTop="5dp">
+  <TextView android:id="@+id/count" android:layout_width="0dp" android:layout_weight="1"
+   android:layout_height="wrap_content" android:text="Catalogo" android:textColor="@color/textSecondary"
+   android:textSize="12sp"/>
+  <Button android:id="@+id/favorites" android:layout_width="wrap_content" android:layout_height="40dp"
+   android:text="☆ Tutte" android:textAllCaps="false"/>
  </LinearLayout>
- <EditText android:id="@+id/search" android:layout_width="match_parent" android:layout_height="48dp" android:layout_marginTop="8dp" android:hint="Cerca una puntata…" android:singleLine="true" android:visibility="gone" android:padding="8dp" android:background="@color/panel"/>
- <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center_vertical" android:paddingTop="6dp">
- <TextView android:id="@+id/count" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:text="Catalogo" android:textColor="@color/textSecondary" android:textSize="12sp"/>
- <Button android:id="@+id/favorites" android:layout_width="wrap_content" android:layout_height="42dp" android:text="☆ Tutte" android:textAllCaps="false"/>
- </LinearLayout>
- <ListView android:id="@+id/episodes" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1"
- android:background="@color/panel" android:divider="@color/divider" android:dividerHeight="1dp"/>
- <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="6dp" android:orientation="vertical" android:padding="10dp" android:background="@color/panel">
- <TextView android:id="@+id/selected" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Seleziona una puntata" android:textStyle="bold" android:textColor="@color/textPrimary" android:textSize="15sp" android:maxLines="2"/>
- <TextView android:id="@+id/notice" android:layout_width="match_parent" android:layout_height="wrap_content" android:paddingTop="3dp" android:text="Riproduzione nativa in preparazione" android:textSize="11sp" android:textColor="@color/textSecondary"/>
- <ProgressBar android:layout_width="match_parent" android:layout_height="3dp" style="?android:attr/progressBarStyleHorizontal" android:progress="0" android:max="100"/>
- <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center_vertical">
- <Button android:id="@+id/previous" android:layout_width="48dp" android:layout_height="44dp" android:text="⏮" android:contentDescription="Puntata precedente"/>
- <Button android:id="@+id/listen" android:layout_width="0dp" android:layout_weight="1" android:layout_height="44dp" android:text="Apri puntata su RaiPlay Sound" android:textAllCaps="false"/>
- <Button android:id="@+id/next" android:layout_width="48dp" android:layout_height="44dp" android:text="⏭" android:contentDescription="Puntata successiva"/>
- </LinearLayout>
+ <ListView android:id="@+id/episodes" android:layout_width="match_parent" android:layout_height="0dp"
+  android:layout_weight="1" android:background="@color/panel" android:divider="@color/divider"
+  android:dividerHeight="1dp"/>
+ <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+  android:layout_marginTop="5dp" android:orientation="vertical" android:padding="10dp"
+  android:background="@color/panel">
+  <TextView android:id="@+id/selected" android:layout_width="match_parent"
+   android:layout_height="wrap_content" android:text="Seleziona una puntata" android:textStyle="bold"
+   android:textColor="@color/textPrimary" android:textSize="15sp"
+   android:maxLines="2" android:ellipsize="end"/>
+  <TextView android:id="@+id/notice" android:layout_width="match_parent"
+   android:layout_height="wrap_content" android:text="Caricamento catalogo…"
+   android:textColor="@color/textSecondary" android:textSize="11sp" android:maxLines="2"/>
+  <SeekBar android:id="@+id/seek" android:layout_width="match_parent" android:layout_height="wrap_content"
+   android:progressTint="@color/favorite" android:thumbTint="@color/favorite"
+   android:max="1000" android:progress="0" android:enabled="false"/>
+  <TextView android:id="@+id/times" android:layout_width="match_parent" android:layout_height="wrap_content"
+   android:text="0:00 / 0:00" android:textColor="@color/textSecondary" android:textSize="11sp"/>
+  <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+   android:orientation="horizontal" android:gravity="center_vertical">
+   <Button android:id="@+id/previous" android:layout_width="48dp" android:layout_height="44dp"
+    android:text="⏮" android:contentDescription="Puntata precedente"/>
+   <Button android:id="@+id/listen" android:layout_width="0dp" android:layout_weight="1"
+    android:layout_height="44dp" android:text="Seleziona una puntata" android:textAllCaps="false"/>
+   <Button android:id="@+id/next" android:layout_width="48dp" android:layout_height="44dp"
+    android:text="⏭" android:contentDescription="Puntata successiva"/>
+  </LinearLayout>
  </LinearLayout>
 </LinearLayout>

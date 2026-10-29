@@ -33,12 +33,19 @@ jobs:
           mkdir -p build/tests
           javac -d build/tests app/src/main/java/it/fantozziforever/player/ReleaseVersion.java tools/tests/ReleaseVersionTest.java
           java -cp build/tests ReleaseVersionTest
+      - name: Verifica catalogo di dieci puntate
+        run: |
+          javac -d build/tests app/src/main/java/it/fantozziforever/player/CatalogTitles.java tools/tests/CatalogTitlesTest.java
+          java -cp build/tests CatalogTitlesTest
       - name: Leggi versione applicazione
         shell: bash
         run: |
           VERSION=$(sed -n "s/^[[:space:]]*versionName '\([^']*\)'/\1/p" app/build.gradle)
           test -n "$VERSION"
           echo "VERSION=$VERSION" >> "$GITHUB_ENV"
+          CODE=$(sed -n "s/^[[:space:]]*versionCode \([0-9]\+\)/\1/p" app/build.gradle)
+          test -n "$CODE"
+          echo "VERSION_CODE=$CODE" >> "$GITHUB_ENV"
       - name: Prepara eventuale firma permanente
         id: firma
         shell: bash
@@ -80,8 +87,8 @@ jobs:
           "$ANDROID_HOME/build-tools/35.0.0/apksigner" verify --verbose --print-certs "$APK_FILE"
           "$ANDROID_HOME/build-tools/35.0.0/aapt" dump badging "$APK_FILE" | head -n 1 | tee "$RUNNER_TEMP/fantozzi-package.txt"
           grep -q "name='it.fantozziforever.player'" "$RUNNER_TEMP/fantozzi-package.txt"
-          grep -q "versionCode='7'" "$RUNNER_TEMP/fantozzi-package.txt"
-          grep -q "versionName='0.4.1'" "$RUNNER_TEMP/fantozzi-package.txt"
+          grep -q "versionCode='${VERSION_CODE}'" "$RUNNER_TEMP/fantozzi-package.txt"
+          grep -q "versionName='${VERSION}'" "$RUNNER_TEMP/fantozzi-package.txt"
       - name: Prepara APK
         shell: bash
         run: |
