@@ -87,9 +87,29 @@ jobs:
           name: FantozziForever-APK
           path: FantozziForever_v*.apk
           if-no-files-found: error
-      - name: Pubblica GitHub Release
+      - name: Controlla sintassi dello script PowerShell
+        shell: pwsh
+        run: |
+          $token = $null
+          $errors = $null
+          [System.Management.Automation.Language.Parser]::ParseFile(
+            "tools/Configura-Firma-Permanente.ps1",
+            [ref]$token, [ref]$errors) | Out-Null
+          if ($errors.Count -gt 0) {
+            $errors | ForEach-Object { Write-Error $_.ToString() }
+            exit 1
+          }
+      - name: Pubblica GitHub Release (senza sovrascrivere tag esistenti)
         env:
           GH_TOKEN: ${{ github.token }}
         shell: bash
         run: |
-          gh release create "v${VERSION}" "$APK" --target "$GITHUB_SHA"             --title "Fantozzi Forever ${VERSION}"             --notes "Aggiornamenti direttamente dall'app. APK ${TIPO}. Prima di installare, l'app verifica integrità SHA-256, identificativo, versione e firma; Android richiede la conferma dell'utente."             --prerelease
+          set -euo pipefail
+          if gh release view "v${VERSION}" >/dev/null 2>&1; then
+            echo "La Release v${VERSION} esiste gia: la lascio invariata."
+          else
+            gh release create "v${VERSION}" "$APK" --target "$GITHUB_SHA" \
+              --title "Fantozzi Forever ${VERSION}" \
+              --notes "APK ${TIPO}. Aggiornamenti dall'app con verifica SHA-256, versione, package e firma Android." \
+              --prerelease
+          fi
